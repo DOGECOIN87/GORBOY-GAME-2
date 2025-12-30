@@ -955,60 +955,61 @@ export default function App() {
         });
 
         rafRef.current = requestAnimationFrame(gameLoop);
-      };
+      }
+    };
 
-      const handleKeyDown = (e: KeyboardEvent) => {
-        g.keys[e.code] = true;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      g.keys[e.code] = true;
 
-        const now = Date.now();
-        if (['KeyA', 'ArrowLeft', 'KeyD', 'ArrowRight'].includes(e.code)) {
-          const isLeft = e.code === 'KeyA' || e.code === 'ArrowLeft';
-          if (g.inputState.lastTap.key === e.code && now - g.inputState.lastTap.time < 300) {
-            if (!g.shipState.rollState.active && g.shipState.alive) {
-              g.shipState.rollState = { active: true, dir: isLeft ? 1 : -1, start: now, duration: 400 };
+      const now = Date.now();
+      if (['KeyA', 'ArrowLeft', 'KeyD', 'ArrowRight'].includes(e.code)) {
+        const isLeft = e.code === 'KeyA' || e.code === 'ArrowLeft';
+        if (g.inputState.lastTap.key === e.code && now - g.inputState.lastTap.time < 300) {
+          if (!g.shipState.rollState.active && g.shipState.alive) {
+            g.shipState.rollState = { active: true, dir: isLeft ? 1 : -1, start: now, duration: 400 };
 
-              const boost = 45;
-              const angle = g.shipState.a + (isLeft ? Math.PI / 2 : -Math.PI / 2);
-              g.shipState.vx += Math.sin(angle) * boost;
-              g.shipState.vy += Math.cos(angle) * boost;
+            const boost = 45;
+            const angle = g.shipState.a + (isLeft ? Math.PI / 2 : -Math.PI / 2);
+            g.shipState.vx += Math.sin(angle) * boost;
+            g.shipState.vy += Math.cos(angle) * boost;
 
-              g.shipState.vx += Math.sin(g.shipState.a) * 20;
-              g.shipState.vy += Math.cos(g.shipState.a) * 20;
-            }
+            g.shipState.vx += Math.sin(g.shipState.a) * 20;
+            g.shipState.vy += Math.cos(g.shipState.a) * 20;
           }
-          g.inputState.lastTap = { key: e.code, time: now };
         }
+        g.inputState.lastTap = { key: e.code, time: now };
+      }
 
-        if (e.code === 'KeyR' && !g.shipState.alive) {
-          g.shipState = {
-            x: 0, y: 0, vx: 0, vy: 0, a: 0, va: 0, tilt: 0,
-            hp: 100, shield: 40, alive: true, invulnUntil: Date.now() + 2000,
-            rollState: { active: false, dir: 0, start: 0, duration: 400 }
-          };
-          g.carried = { COIN: 0, GORBOY: 0, CRYSTAL: 0 };
-          g.multiplier = 1;
-          g.multUntil = 0;
-          // Clear existing power-ups
-          g.powerups.forEach(pu => g.scene?.remove(pu.mesh));
-          g.powerups = [];
-          spawnWave(1);
-        }
-      };
+      if (e.code === 'KeyR' && !g.shipState.alive) {
+        g.shipState = {
+          x: 0, y: 0, vx: 0, vy: 0, a: 0, va: 0, tilt: 0,
+          hp: 100, shield: 40, alive: true, invulnUntil: Date.now() + 2000,
+          rollState: { active: false, dir: 0, start: 0, duration: 400 }
+        };
+        g.carried = { COIN: 0, GORBOY: 0, CRYSTAL: 0 };
+        g.multiplier = 1;
+        g.multUntil = 0;
+        // Clear existing power-ups
+        g.powerups.forEach(pu => g.scene?.remove(pu.mesh));
+        g.powerups = [];
+        spawnWave(1);
+      }
+    };
 
-      const handleKeyUp = (e: KeyboardEvent) => { g.keys[e.code] = false; };
+    const handleKeyUp = (e: KeyboardEvent) => { g.keys[e.code] = false; };
 
-      window.addEventListener("keydown", handleKeyDown);
-      window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
 
-      rafRef.current = requestAnimationFrame(gameLoop);
+    rafRef.current = requestAnimationFrame(gameLoop);
 
-      return () => {
-        cancelAnimationFrame(rafRef.current);
-        window.removeEventListener("keydown", handleKeyDown);
-        window.removeEventListener("keyup", handleKeyUp);
-        if (cleanup) cleanup();
-      };
-    }, [initThree, spawnWave, gameState]);
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+      if (cleanup) cleanup();
+    };
+  }, [initThree, spawnWave, gameState]);
 
   const setTouchInput = (key: keyof typeof gameRef.current.touchControls, val: boolean) => {
     gameRef.current.touchControls[key] = val;
