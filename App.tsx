@@ -1008,7 +1008,7 @@ export default function App() {
         window.removeEventListener("keyup", handleKeyUp);
         if (cleanup) cleanup();
       };
-    }, [initThree, spawnWave]);
+    }, [initThree, spawnWave, gameState]);
 
   const setTouchInput = (key: keyof typeof gameRef.current.touchControls, val: boolean) => {
     gameRef.current.touchControls[key] = val;
