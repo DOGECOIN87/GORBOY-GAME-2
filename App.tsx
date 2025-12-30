@@ -23,7 +23,6 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import { Button, Card, Badge, Progress } from "./components/UI";
 import { TokenType, Hud, Character, PowerUp } from "./types";
-import { getTacticalBriefing } from "./services/geminiService";
 
 const MotionDiv = motion.div as any;
 
@@ -112,9 +111,21 @@ export default function App() {
     cameraShake: 0
   });
 
-  const updateTacticalLog = useCallback(async (wave: number, hp: number, charName: string) => {
-    const briefing = await getTacticalBriefing(wave, hp, charName);
-    setTacticalLog(briefing);
+  const TACTICAL_MESSAGES = [
+    "Sector clear for now. Stay frosty, pilot.",
+    "Void-drift detected. Keep your hull intact.",
+    "Bank-orbit approaching. Secure that cargo.",
+    "Scrap-metal inbound. Eyes up, pilot.",
+    "Neural link stable. Engage thrusters.",
+    "Hull-breach warning systems armed. Stay sharp.",
+    "Asteroid cluster detected. Navigate with caution.",
+    "Power-ups spawning. Collect and dominate.",
+  ];
+
+  const updateTacticalLog = useCallback((wave: number, hp: number, charName: string) => {
+    const messageIndex = (wave - 1) % TACTICAL_MESSAGES.length;
+    const hpWarning = hp < 30 ? " CRITICAL: Hull integrity failing!" : "";
+    setTacticalLog(TACTICAL_MESSAGES[messageIndex] + hpWarning);
   }, []);
 
   const createAsteroidGeometry = (radius: number) => {
@@ -820,7 +831,7 @@ export default function App() {
             }
           }
 
-          if (g.shipState.alive && now > g.shipState.invulnUntil) {
+          if (g.shipState.alive && g.ship && now > g.shipState.invulnUntil) {
             if (a.mesh.position.distanceTo(g.ship.position) < a.r + 2.5) {
               g.shipState.shield -= 25;
               g.cameraShake = 2.0;
@@ -844,7 +855,7 @@ export default function App() {
           p.mesh.rotation.y += 0.04;
           p.mesh.position.y = Math.sin(time * 0.005) * 0.5;
 
-          if (p.mesh.position.distanceTo(g.ship.position) < 5 && g.shipState.alive) {
+          if (g.ship && p.mesh.position.distanceTo(g.ship.position) < 5 && g.shipState.alive) {
             g.carried[p.type] += g.multiplier;
             g.scene?.remove(p.mesh);
             g.pickups.splice(i, 1);
@@ -870,7 +881,7 @@ export default function App() {
           pu.mesh.scale.set(pulse, pulse, pulse);
 
           // Collection check
-          if (pu.mesh.position.distanceTo(g.ship.position) < 4 && g.shipState.alive) {
+          if (g.ship && pu.mesh.position.distanceTo(g.ship.position) < 4 && g.shipState.alive) {
             // Apply power-up effect
             if (pu.kind === "X2") {
               g.multiplier = 2;
